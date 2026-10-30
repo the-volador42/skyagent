@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkyAgent</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><radialGradient id='g' cx='35%25' cy='30%25'><stop offset='0' stop-color='%23fff'/><stop offset='.5' stop-color='%23a9d8ff'/><stop offset='1' stop-color='%232b7fff'/></radialGradient></defs><circle cx='32' cy='32' r='28' fill='url(%23g)'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="sky"></canvas>
+<div class="haze"></div>
+
+<div class="app" id="app">
+  <!-- ============ сайдбар ============ -->
+  <aside class="sidebar glass" id="sidebar">
+    <div class="brand">
+      <div class="orb"><span></span></div>
+      <div class="brand-text">
+        <div class="brand-name">SkyAgent</div>
+        <div class="brand-sub">локальный ИИ над облаками</div>
+      </div>
+    </div>
+    <button class="new-btn" id="newBtn">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      <span>Новый разговор</span>
+      <kbd>Ctrl K</kbd>
+    </button>
+    <div class="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="search" placeholder="Поиск по разговорам">
+    </div>
+    <nav class="convs" id="convs"></nav>
+    <div class="side-foot">
+      <div class="status" id="status"><i></i><span>подключение…</span></div>
+      <button class="cli-btn" id="cliBtn" title="Закрыть окно и продолжить в терминале">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m7 9 3 3-3 3M12.5 15H17"/></svg>
+        <span>Открыть CLI</span>
+      </button>
+      <div class="memory-teaser" title="Скоро">
+        <svg viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="12" cy="17" r="2.2"/><path d="M8 8l3 7M16.5 7.8 13 15M8.2 7h7.6"/></svg>
+        <span>Память · граф</span><em>скоро</em>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ основная зона ============ -->
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn glass only-mobile" id="menuBtn" aria-label="Меню">
+        <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+
+      <div class="modes glass" id="modes" role="tablist">
+        <div class="mode-pill" id="modePill"></div>
+        <button class="mode active" data-mode="chat" role="tab">
+          <svg viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/></svg>
+          <span>Чат</span>
+        </button>
+        <button class="mode" data-mode="agent" role="tab">
+          <svg viewBox="0 0 24 24"><path d="M13 3 5 13.5h6L10 21l8-10.5h-6z"/></svg>
+          <span>Агент</span>
+        </button>
+      </div>
+
+      <div class="model-picker" id="modelPicker">
+        <button class="model-btn glass" id="modelBtn">
+          <span class="model-dot"></span>
+          <span class="model-name" id="modelName">модель…</span>
+          <svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg>
+        </button>
+        <div class="menu glass-strong" id="modelMenu"></div>
+      </div>
+
+      <div class="top-right">
+        <label class="auto glass agent-only" id="autoWrap" title="Выполнять действия без подтверждения">
+          <input type="checkbox" id="autoToggle">
+          <span class="switch"><i></i></span>
+          <span>Авто</span>
+        </label>
+        <button class="icon-btn glass" id="settingsBtn" aria-label="Настройки">
+          <svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+        </button>
+        <div class="menu glass-strong settings" id="settings">
+          <div class="set-title">Сцена</div>
+          <div class="themes" id="themes">
+            <button class="theme-tile" data-theme="sky"><i style="background:linear-gradient(180deg,#2f7fe6 0%,#9cccff 50%,#ffffff 62%,#dbe9fb 100%)"></i><span>Небо</span></button>
+            <button class="theme-tile" data-theme="mountains"><i style="background:linear-gradient(180deg,#3d86dc 0%,#bcd8f5 45%,#f4f8ff 52%,#7d8899 60%,#4a5566 100%)"></i><span>Горы</span></button>
+            <button class="theme-tile" data-theme="forest"><i style="background:linear-gradient(180deg,#5b9de2 0%,#d6e7f5 45%,#2e5a47 58%,#16352b 100%)"></i><span>Лес</span></button>
+            <button class="theme-tile" data-theme="meadow"><i style="background:linear-gradient(180deg,#2f86ea 0%,#cfe6ff 48%,#9cc85a 56%,#5f9a32 100%)"></i><span>Луг</span></button>
+          </div>
+          <div class="set-row">
+            <span>Качество графики</span>
+            <div class="seg" id="quality">
+              <button data-q="0">Экономия</button><button data-q="1">Авто</button><button data-q="2">Максимум</button>
+            </div>
+          </div>
+          <label class="set-row agent-only">
+            <span>Модель зрения <small>для инструмента look_at_screen</small></span>
+            <select id="vision"></select>
+            <small class="vision-hint" id="visionHint"></small>
+          </label>
+          <div class="set-sep"></div>
+          <div class="set-title">Параметры генерации</div>
+          <label class="set-row">
+            <span>Температура <b id="tempVal">0.7</b></span>
+            <input type="range" id="temp" min="0" max="1.5" step="0.05" value="0.7">
+          </label>
+          <label class="set-row">
+            <span>Контекст <b id="ctxVal">8192</b></span>
+            <input type="range" id="ctx" min="2048" max="32768" step="2048" value="8192">
+          </label>
+          <label class="set-row toggle-row" id="thinkRow">
+            <span>Размышления <small>для моделей с thinking</small></span>
+            <input type="checkbox" id="think" checked><span class="switch"><i></i></span>
+          </label>
+          <label class="set-row chat-only">
+            <span>Системный промпт</span>
+            <textarea id="system" rows="4" placeholder="Например: отвечай кратко и по делу"></textarea>
+          </label>
+          <div class="set-note agent-only">В режиме агента температура и промпт заданы ядром SkyAgent.</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="scroll" id="scroll">
+      <div class="thread" id="thread"></div>
+      <div class="hero" id="hero">
+        <div class="hero-orb"><span></span><span></span><span></span></div>
+        <div class="hero-card">
+          <h1 id="heroTitle">Над облаками</h1>
+          <p id="heroSub">Спокойный разговор с локальной моделью. Ничего не уходит дальше твоего компьютера.</p>
+        </div>
+        <div class="chips" id="chips"></div>
+      </div>
+    </section>
+
+    <footer class="composer-wrap">
+      <div class="composer glass" id="composer">
+        <div class="attachments" id="attachments"></div>
+        <div class="composer-row">
+          <button class="icon-btn ghost chat-only" id="attachBtn" title="Прикрепить изображение">
+            <svg viewBox="0 0 24 24"><path d="m20 11.5-7.8 7.8a5 5 0 0 1-7.1-7.1l8.5-8.5a3.4 3.4 0 0 1 4.8 4.8l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/></svg>
+          </button>
+          <input type="file" id="file" accept="image/*" multiple hidden>
+          <textarea id="input" rows="1" placeholder="Спроси что угодно…"></textarea>
+          <button class="send" id="sendBtn" aria-label="Отправить">
+            <svg class="i-send" viewBox="0 0 24 24"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg>
+            <svg class="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2.5"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="hint" id="hint">Enter — отправить · Shift+Enter — новая строка</div>
+    </footer>
+  </main>
+</div>
+
+<div class="drop" id="drop"><div class="drop-card glass-strong">Отпусти, чтобы прикрепить изображение</div></div>
+<div class="toast glass-strong" id="toast"></div>
+<div class="bye" id="bye"><div class="bye-card glass-strong">
+  <div class="orb"><span></span></div>
+  <h2>SkyAgent ушёл в терминал</h2>
+  <p>CLI открыт в отдельном окне. Вернуться сюда — команда <code>/gui</code>. Эту вкладку можно закрыть.</p>
+</div></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+# Уже используется в текущем коде
+requests
+ddgs
+pyautogui
+pillow
+
+# Конфигурация
+python-dotenv
+
+# Память: граф и хронология
+neo4j
+sqlite-vec
+
+# Звук: запись микрофона и звука системы (WASAPI loopback), распознавание речи
+numpy
+sounddevice
+pyaudiowpatch
+vosk                  # распознавание речи на CPU (по умолчанию); модель — в models/
+faster-whisper        # VAD Silero (и Whisper, если SKYAGENT_STT=whisper)
+nvidia-cublas-cu12
+nvidia-cudnn-cu12==9.*
+
+# Экран: быстрые скриншоты и текст окон через UI Automation
+mss
+uiautomation
+
+# CLI (cli.py)
+rich
+pyperclip
+
+# Голос «я / другие» (голосовые отпечатки, ONNX на CPU)
+sherpa-onnx
+
+# Собственный браузер агента (Edge без окна, skyagent/browser.py)
+playwright
+
+# Telegram: сообщения из твоего аккаунта в дневник (skyagent/sensors/telegram.py)
+telethon
+
+# Мини-окно поверх всех окон (mini.py)
+PySide6-Essentials
+
+# Голос ассистента Piper (skyagent/tts.py; sherpa-onnx 2.0 голоса Piper больше не читает)
+piper-tts
